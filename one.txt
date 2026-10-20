@@ -1,0 +1,731 @@
+import React from "react";
+import AdminLayout from "../../layouts/AdminLayout";
+
+const LoanAccount = () => {
+  // Temporary data.
+  // Later replace this with `selectedLoan` from useLoan()
+  // and load the account using req.params.id.
+  const loan = {
+    accountNumber: "FIN-2026-00124",
+
+    borrower: {
+      name: "Mustafa Raza Khan",
+      email: "mustafa@example.com",
+      phone: "+91 98765 43210",
+      fatherName: "Raza Khan",
+      aadhaarNumber: "XXXX XXXX 4521",
+    },
+
+    requestedAmount: 100000,
+    approvedAmount: 80000,
+
+    interestRate: 12,
+    interestAmount: 9600,
+    processingFee: 1200,
+    totalPayableAmount: 90800,
+
+    loanDuration: 12,
+    loanDurationUnit: "months",
+
+    installmentCount: 12,
+    installmentAmount: 7567,
+    installmentFrequency: "monthly",
+
+    firstInstallmentDate: "2026-11-05",
+
+    totalPaidAmount: 15134,
+    outstandingAmount: 75666,
+
+    status: "active",
+
+    approvedAt: "2026-10-04",
+    remarks:
+      "Loan approved after verification of customer information and supporting documents.",
+  };
+
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
+      maximumFractionDigits: 0,
+    }).format(Number(amount || 0));
+  };
+
+  const formatDate = (date) => {
+    if (!date) return "—";
+
+    return new Date(date).toLocaleDateString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+  };
+
+  const getStatusStyle = (status) => {
+    const styles = {
+      active: "bg-emerald-50 text-emerald-700 border-emerald-200",
+      pending: "bg-amber-50 text-amber-700 border-amber-200",
+      completed: "bg-blue-50 text-blue-700 border-blue-200",
+      defaulted: "bg-red-50 text-red-700 border-red-200",
+      closed: "bg-slate-100 text-slate-600 border-slate-200",
+    };
+
+    return styles[status] || styles.pending;
+  };
+
+  const paidPercentage =
+    loan.totalPayableAmount > 0
+      ? Math.min((loan.totalPaidAmount / loan.totalPayableAmount) * 100, 100)
+      : 0;
+
+  return (
+    <AdminLayout>
+      <main className="min-h-full bg-slate-50 px-4 py-6 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl">
+          {/* =====================================================
+              PAGE HEADER
+          ===================================================== */}
+          <section className="mb-6">
+            <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+              <div>
+                <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                  Lending / Loan Account
+                </p>
+
+                <div className="flex flex-wrap items-center gap-3">
+                  <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
+                    Loan Account
+                  </h1>
+
+                  <span
+                    className={`inline-flex items-center rounded-md border px-2.5 py-1 text-xs font-semibold capitalize ${getStatusStyle(
+                      loan.status,
+                    )}`}
+                  >
+                    <span className="mr-2 h-1.5 w-1.5 rounded-full bg-current" />
+                    {loan.status}
+                  </span>
+                </div>
+
+                <p className="mt-1.5 text-sm text-slate-500">
+                  Manage the approved loan, repayment plan and account activity.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  className="border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-700 transition hover:border-slate-900 hover:text-slate-900"
+                >
+                  Edit Account
+                </button>
+
+                <button
+                  type="button"
+                  className="bg-slate-900 px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-[#ff0066]"
+                >
+                  Record Payment
+                </button>
+              </div>
+            </div>
+          </section>
+
+          {/* =====================================================
+              ACCOUNT SUMMARY
+          ===================================================== */}
+          <section className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            <SummaryCard
+              label="Approved Amount"
+              value={formatCurrency(loan.approvedAmount)}
+              description="Actual approved loan"
+            />
+
+            <SummaryCard
+              label="Total Payable"
+              value={formatCurrency(loan.totalPayableAmount)}
+              description={`${loan.interestRate}% interest applied`}
+            />
+
+            <SummaryCard
+              label="Total Paid"
+              value={formatCurrency(loan.totalPaidAmount)}
+              description={`${paidPercentage.toFixed(0)}% of total payable`}
+              positive
+            />
+
+            <SummaryCard
+              label="Outstanding"
+              value={formatCurrency(loan.outstandingAmount)}
+              description="Amount remaining"
+              dark
+            />
+          </section>
+
+          {/* =====================================================
+              MAIN GRID
+          ===================================================== */}
+          <div className="grid gap-6 xl:grid-cols-[1.35fr_0.65fr]">
+            {/* ===================================================
+                LEFT
+            =================================================== */}
+            <div className="space-y-6">
+              {/* -----------------------------------------------
+                  BORROWER
+              ------------------------------------------------ */}
+              <section className="border border-slate-200 bg-white">
+                <SectionHeader
+                  eyebrow="01"
+                  title="Borrower information"
+                  description="Customer details associated with this loan account."
+                />
+
+                <div className="p-6">
+                  <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
+                    <div className="flex h-16 w-16 shrink-0 items-center justify-center bg-slate-900 text-xl font-semibold uppercase text-white">
+                      {loan.borrower.name?.charAt(0)}
+                    </div>
+
+                    <div className="min-w-0 flex-1">
+                      <h2 className="text-lg font-semibold text-slate-900">
+                        {loan.borrower.name}
+                      </h2>
+
+                      <p className="mt-1 text-sm text-slate-400">
+                        Loan customer
+                      </p>
+
+                      <div className="mt-5 grid gap-x-8 gap-y-5 sm:grid-cols-2">
+                        <Detail label="Email" value={loan.borrower.email} />
+
+                        <Detail label="Phone" value={loan.borrower.phone} />
+
+                        <Detail
+                          label="Father's name"
+                          value={loan.borrower.fatherName}
+                        />
+
+                        <Detail
+                          label="Aadhaar number"
+                          value={loan.borrower.aadhaarNumber}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              {/* -----------------------------------------------
+                  LOAN FINANCIAL DETAILS
+              ------------------------------------------------ */}
+              <section className="border border-slate-200 bg-white">
+                <SectionHeader
+                  eyebrow="02"
+                  title="Loan financial details"
+                  description="Approved financial terms for this account."
+                />
+
+                <div className="grid gap-px bg-slate-200 sm:grid-cols-2">
+                  <FinancialItem
+                    label="Requested amount"
+                    value={formatCurrency(loan.requestedAmount)}
+                  />
+
+                  <FinancialItem
+                    label="Approved amount"
+                    value={formatCurrency(loan.approvedAmount)}
+                    highlight
+                  />
+
+                  <FinancialItem
+                    label="Interest rate"
+                    value={`${loan.interestRate}%`}
+                  />
+
+                  <FinancialItem
+                    label="Interest amount"
+                    value={formatCurrency(loan.interestAmount)}
+                  />
+
+                  <FinancialItem
+                    label="Processing fee"
+                    value={formatCurrency(loan.processingFee)}
+                  />
+
+                  <FinancialItem
+                    label="Total payable"
+                    value={formatCurrency(loan.totalPayableAmount)}
+                    highlight
+                  />
+                </div>
+              </section>
+
+              {/* -----------------------------------------------
+                  REPAYMENT PLAN
+              ------------------------------------------------ */}
+              <section className="border border-slate-200 bg-white">
+                <SectionHeader
+                  eyebrow="03"
+                  title="Repayment plan"
+                  description="Current installment configuration for the borrower."
+                />
+
+                <div className="grid gap-px bg-slate-200 sm:grid-cols-2 lg:grid-cols-3">
+                  <FinancialItem
+                    label="Loan duration"
+                    value={`${loan.loanDuration} ${loan.loanDurationUnit}`}
+                  />
+
+                  <FinancialItem
+                    label="Installments"
+                    value={loan.installmentCount}
+                  />
+
+                  <FinancialItem
+                    label="Installment amount"
+                    value={formatCurrency(loan.installmentAmount)}
+                  />
+
+                  <FinancialItem
+                    label="Frequency"
+                    value={capitalize(loan.installmentFrequency)}
+                  />
+
+                  <FinancialItem
+                    label="First due date"
+                    value={formatDate(loan.firstInstallmentDate)}
+                  />
+
+                  <FinancialItem
+                    label="Account status"
+                    value={capitalize(loan.status)}
+                  />
+                </div>
+              </section>
+
+              {/* -----------------------------------------------
+                  PAYMENT PROGRESS
+              ------------------------------------------------ */}
+              <section className="border border-slate-200 bg-white p-6">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                  <div>
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-400">
+                      Repayment progress
+                    </p>
+
+                    <h2 className="mt-2 text-xl font-semibold text-slate-900">
+                      {formatCurrency(loan.totalPaidAmount)}
+                      <span className="ml-2 text-sm font-normal text-slate-400">
+                        paid
+                      </span>
+                    </h2>
+                  </div>
+
+                  <p className="text-sm font-semibold text-slate-700">
+                    {paidPercentage.toFixed(1)}%
+                  </p>
+                </div>
+
+                <div className="mt-5 h-2 overflow-hidden bg-slate-100">
+                  <div
+                    className="h-full bg-[#ff0066] transition-all"
+                    style={{ width: `${paidPercentage}%` }}
+                  />
+                </div>
+
+                <div className="mt-4 flex justify-between text-xs text-slate-400">
+                  <span>Paid {formatCurrency(loan.totalPaidAmount)}</span>
+
+                  <span>
+                    Remaining {formatCurrency(loan.outstandingAmount)}
+                  </span>
+                </div>
+              </section>
+
+              {/* -----------------------------------------------
+                  REMARKS
+              ------------------------------------------------ */}
+              {loan.remarks && (
+                <section className="border border-slate-200 bg-white p-6">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-400">
+                    Account remarks
+                  </p>
+
+                  <p className="mt-3 text-sm leading-6 text-slate-600">
+                    {loan.remarks}
+                  </p>
+                </section>
+              )}
+            </div>
+
+            {/* ===================================================
+                RIGHT SIDEBAR
+            =================================================== */}
+            <aside className="space-y-6">
+              {/* -----------------------------------------------
+                  ACCOUNT INFORMATION
+              ------------------------------------------------ */}
+              <section className="border border-slate-200 bg-white">
+                <div className="border-b border-slate-100 px-5 py-5">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-400">
+                    Account
+                  </p>
+
+                  <h2 className="mt-1 text-base font-semibold text-slate-900">
+                    Account information
+                  </h2>
+                </div>
+
+                <div className="divide-y divide-slate-100">
+                  <SideDetail
+                    label="Account number"
+                    value={loan.accountNumber}
+                  />
+
+                  <SideDetail
+                    label="Approved on"
+                    value={formatDate(loan.approvedAt)}
+                  />
+
+                  <SideDetail
+                    label="First installment"
+                    value={formatDate(loan.firstInstallmentDate)}
+                  />
+
+                  <SideDetail
+                    label="Frequency"
+                    value={capitalize(loan.installmentFrequency)}
+                  />
+                </div>
+              </section>
+
+              {/* -----------------------------------------------
+                  PAYMENT ACTIONS
+              ------------------------------------------------ */}
+              <section className="border border-slate-200 bg-white p-5">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-400">
+                  Account actions
+                </p>
+
+                <h2 className="mt-2 text-base font-semibold text-slate-900">
+                  Manage this loan
+                </h2>
+
+                <div className="mt-5 space-y-2">
+                  <button
+                    type="button"
+                    className="w-full border border-slate-200 px-4 py-3 text-left text-xs font-semibold text-slate-700 transition hover:border-slate-900 hover:text-slate-900"
+                  >
+                    View installments
+                  </button>
+
+                  <button
+                    type="button"
+                    className="w-full border border-slate-200 px-4 py-3 text-left text-xs font-semibold text-slate-700 transition hover:border-[#ff0066] hover:text-[#ff0066]"
+                  >
+                    Record payment
+                  </button>
+
+                  <button
+                    type="button"
+                    className="w-full border border-slate-200 px-4 py-3 text-left text-xs font-semibold text-slate-700 transition hover:border-slate-900 hover:text-slate-900"
+                  >
+                    Edit repayment plan
+                  </button>
+                </div>
+              </section>
+
+              {/* -----------------------------------------------
+                  OUTSTANDING
+              ------------------------------------------------ */}
+              <section className="bg-slate-900 p-6 text-white">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                  Outstanding balance
+                </p>
+
+                <p className="mt-3 text-3xl font-semibold tracking-tight">
+                  {formatCurrency(loan.outstandingAmount)}
+                </p>
+
+                <p className="mt-2 text-xs leading-5 text-slate-400">
+                  This is the current amount remaining on the loan account.
+                </p>
+
+                <button
+                  type="button"
+                  className="mt-6 w-full bg-[#ff0066] px-4 py-3 text-xs font-semibold text-white transition hover:bg-pink-500"
+                >
+                  Record payment
+                </button>
+              </section>
+            </aside>
+          </div>
+
+          {/* =====================================================
+              INSTALLMENT PREVIEW
+          ===================================================== */}
+          <section className="mt-6 overflow-hidden border border-slate-200 bg-white">
+            <div className="border-b border-slate-200 px-5 py-5">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-400">
+                    Repayment
+                  </p>
+
+                  <h2 className="mt-1 text-base font-semibold text-slate-900">
+                    Installment schedule
+                  </h2>
+
+                  <p className="mt-1 text-xs text-slate-400">
+                    Track upcoming and completed repayments.
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  className="text-xs font-semibold text-[#ff0066] hover:underline"
+                >
+                  View all installments
+                </button>
+              </div>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[800px]">
+                <thead>
+                  <tr className="border-b border-slate-200 bg-slate-50">
+                    <th className="px-5 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                      Installment
+                    </th>
+
+                    <th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                      Due date
+                    </th>
+
+                    <th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                      Amount
+                    </th>
+
+                    <th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                      Paid
+                    </th>
+
+                    <th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                      Remaining
+                    </th>
+
+                    <th className="px-5 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                      Status
+                    </th>
+                  </tr>
+                </thead>
+
+                <tbody className="divide-y divide-slate-100">
+                  {[
+                    {
+                      number: 1,
+                      date: "2026-11-05",
+                      amount: 7567,
+                      paid: 7567,
+                      remaining: 0,
+                      status: "paid",
+                    },
+                    {
+                      number: 2,
+                      date: "2026-12-05",
+                      amount: 7567,
+                      paid: 7567,
+                      remaining: 0,
+                      status: "paid",
+                    },
+                    {
+                      number: 3,
+                      date: "2027-01-05",
+                      amount: 7567,
+                      paid: 0,
+                      remaining: 7567,
+                      status: "pending",
+                    },
+                  ].map((item) => (
+                    <tr
+                      key={item.number}
+                      className="transition hover:bg-slate-50"
+                    >
+                      <td className="px-5 py-4">
+                        <span className="text-sm font-semibold text-slate-900">
+                          #{String(item.number).padStart(2, "0")}
+                        </span>
+                      </td>
+
+                      <td className="px-4 py-4 text-sm text-slate-600">
+                        {formatDate(item.date)}
+                      </td>
+
+                      <td className="px-4 py-4 text-sm font-semibold text-slate-900">
+                        {formatCurrency(item.amount)}
+                      </td>
+
+                      <td className="px-4 py-4 text-sm text-slate-600">
+                        {formatCurrency(item.paid)}
+                      </td>
+
+                      <td className="px-4 py-4 text-sm text-slate-600">
+                        {formatCurrency(item.remaining)}
+                      </td>
+
+                      <td className="px-5 py-4">
+                        <span
+                          className={`inline-flex rounded-md border px-2.5 py-1 text-xs font-semibold capitalize ${
+                            item.status === "paid"
+                              ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                              : "border-amber-200 bg-amber-50 text-amber-700"
+                          }`}
+                        >
+                          {item.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          {/* =====================================================
+              FOOTER
+          ===================================================== */}
+          <div className="py-8 text-center">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-300">
+              Finora Lending Operations
+            </p>
+          </div>
+        </div>
+      </main>
+    </AdminLayout>
+  );
+};
+
+/* =========================================================
+   SUMMARY CARD
+========================================================= */
+
+const SummaryCard = ({ label, value, description, positive, dark }) => {
+  return (
+    <div
+      className={`border p-5 ${
+        dark ? "border-slate-900 bg-slate-900" : "border-slate-200 bg-white"
+      }`}
+    >
+      <p
+        className={`text-[10px] font-semibold uppercase tracking-wider ${
+          dark ? "text-slate-500" : "text-slate-400"
+        }`}
+      >
+        {label}
+      </p>
+
+      <p
+        className={`mt-3 truncate text-xl font-semibold ${
+          dark ? "text-white" : positive ? "text-emerald-600" : "text-slate-900"
+        }`}
+      >
+        {value}
+      </p>
+
+      <p
+        className={`mt-1 text-xs ${dark ? "text-slate-500" : "text-slate-400"}`}
+      >
+        {description}
+      </p>
+    </div>
+  );
+};
+
+/* =========================================================
+   SECTION HEADER
+========================================================= */
+
+const SectionHeader = ({ eyebrow, title, description }) => {
+  return (
+    <div className="border-b border-slate-100 px-6 py-5">
+      <div className="flex items-start gap-4">
+        <span className="pt-0.5 text-[10px] font-bold tracking-wider text-[#ff0066]">
+          {eyebrow}
+        </span>
+
+        <div>
+          <h2 className="text-base font-semibold text-slate-900">{title}</h2>
+
+          <p className="mt-1 text-xs leading-5 text-slate-400">{description}</p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/* =========================================================
+   DETAIL
+========================================================= */
+
+const Detail = ({ label, value }) => {
+  return (
+    <div>
+      <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+        {label}
+      </p>
+
+      <p className="mt-1.5 text-sm font-medium text-slate-800">
+        {value || "—"}
+      </p>
+    </div>
+  );
+};
+
+/* =========================================================
+   FINANCIAL ITEM
+========================================================= */
+
+const FinancialItem = ({ label, value, highlight }) => {
+  return (
+    <div className="bg-white p-5">
+      <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+        {label}
+      </p>
+
+      <p
+        className={`mt-2 text-sm font-semibold ${
+          highlight ? "text-[#ff0066]" : "text-slate-900"
+        }`}
+      >
+        {value}
+      </p>
+    </div>
+  );
+};
+
+/* =========================================================
+   SIDEBAR DETAIL
+========================================================= */
+
+const SideDetail = ({ label, value }) => {
+  return (
+    <div className="flex items-center justify-between gap-4 px-5 py-4">
+      <p className="text-xs text-slate-400">{label}</p>
+
+      <p className="text-right text-xs font-semibold text-slate-700">
+        {value || "—"}
+      </p>
+    </div>
+  );
+};
+
+/* =========================================================
+   HELPERS
+========================================================= */
+
+const capitalize = (value) => {
+  if (!value) return "—";
+
+  return value.charAt(0).toUpperCase() + value.slice(1);
+};
+
+export default LoanAccount;
